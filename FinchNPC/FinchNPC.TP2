@@ -330,6 +330,10 @@ ACTION_IF GAME_IS ~bgt~ THEN BEGIN
   EXTEND_TOP ~aram00.bcs~ ~FinchNPC/scripts/append_aram00.baf~
 END
 
+ACTION_IF GAME_IS ~bgee eet~ THEN BEGIN
+  EXTEND_TOP ~bd0103.bcs~ ~FinchNPC/scripts/append_aram00.baf~
+END
+
 COMPILE EVALUATE_BUFFER ~FinchNPC/scripts/sufinch.baf~
 COMPILE EVALUATE_BUFFER ~FinchNPC/scripts/sufinchd.baf~
 

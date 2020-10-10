@@ -1,5 +1,7 @@
 IF
-	InParty("sufinch")
+	OR(2)
+        InMyArea("sufinch")
+        InPartyAllowDead("sufinch")
 	Global("er_FinchLeavesBGT","GLOBAL",0)
 THEN
 	RESPONSE #100
