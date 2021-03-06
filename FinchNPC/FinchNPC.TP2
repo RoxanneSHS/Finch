@@ -1,6 +1,6 @@
 BACKUP ~FinchNPC/backup~
 AUTHOR ~llamababe@pocketplane.net~
-VERSION ~v5.1~
+VERSION ~v5.2~
 
 ALWAYS
   INCLUDE ~FinchNPC\lib\er_lib.tpa~
