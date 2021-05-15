@@ -1,6 +1,6 @@
 BACKUP ~FinchNPC/backup~
 AUTHOR ~llamababe@pocketplane.net~
-VERSION ~v5.2~
+VERSION ~v5.3~
 
 ALWAYS
   INCLUDE ~FinchNPC\lib\er_lib.tpa~
@@ -29,7 +29,7 @@ LANGUAGE ~Russian~
 
 BEGIN @14
 
-REQUIRE_PREDICATE GAME_IS ~tutu tutu_totsc bgee bgt eet~ @1145
+REQUIRE_PREDICATE GAME_IS ~bgee eet~ @1145
 
 ADD_JOURNAL @68 @812 @802 @67 USING ~%er_tra_path%/english/sufinch.tra~
                                     ~%er_tra_path%/%LANGUAGE%/sufinch.tra~
@@ -94,6 +94,7 @@ COPY ~FinchNPC/cre/sufinch1.cre~ ~override/sufinch1.cre~
   SAY BIO @45
   WRITE_BYTE 0x237 2
   LAUNCH_PATCH_MACRO ~ER_PATCH_ITEMS_ON_CRE~
+  REPLACE_TEXTUALLY ~misc3p~ ~sumisc3p~ (8)
 
 COPY ~FinchNPC/cre/sufinch2.cre~ ~override/sufinch2.cre~
   SAY NAME1 @0
@@ -144,6 +145,7 @@ COPY ~FinchNPC/cre/sufinch2.cre~ ~override/sufinch2.cre~
   SAY BIO @45
   WRITE_BYTE 0x237 2
   LAUNCH_PATCH_MACRO ~ER_PATCH_ITEMS_ON_CRE~
+  REPLACE_TEXTUALLY ~misc3p~ ~sumisc3p~ (8)
 
 COPY ~FinchNPC/cre/sufinch4.cre~ ~override/sufinch4.cre~
   SAY NAME1 @0
@@ -194,6 +196,7 @@ COPY ~FinchNPC/cre/sufinch4.cre~ ~override/sufinch4.cre~
   SAY BIO @45
   WRITE_BYTE 0x237 2
   LAUNCH_PATCH_MACRO ~ER_PATCH_ITEMS_ON_CRE~
+  REPLACE_TEXTUALLY ~misc3p~ ~sumisc3p~ (8)
 
 COPY ~FinchNPC/cre/sutrask.cre~ ~override/sutrask.cre~
   SAY NAME1 @46
@@ -234,7 +237,8 @@ COMPILE EVALUATE_BUFFER ~FinchNPC/d/sufinchj.d~
   USING ~%er_tra_path%/english/sufinch.tra~
         ~%er_tra_path%/%LANGUAGE%/sufinch.tra~
 
-ACTION_IF FILE_EXISTS ~override/BA#MURN.DLG~ AND NOT FILE_EXISTS ~override/FINCHMURNETH.XXX~
+ACTION_IF FILE_EXISTS ~override/BA#MURN.DLG~ AND NOT FILE_EXISTS
+~override/FINCHMURNETH.XXX~
        THEN BEGIN
        COPY_EXISTING ~SW1H01.ITM~ ~override/FINCHMURNETH.XXX~
        COMPILE EVALUATE_BUFFER ~FinchNPC/d/xmodfinchmurneth.d~
@@ -242,13 +246,14 @@ ACTION_IF FILE_EXISTS ~override/BA#MURN.DLG~ AND NOT FILE_EXISTS ~override/FINCH
                ~%er_tra_path%/%LANGUAGE%/sufinch.tra~
 END
 
-ACTION_IF FILE_EXISTS ~override/J#INDIB.DLG~ AND NOT FILE_EXISTS ~override/INDIRAFINCH.XXX~
+ACTION_IF FILE_EXISTS ~override/J#INDIB.DLG~ AND NOT FILE_EXISTS
+~override/INDIRAFINCH.XXX~
        THEN BEGIN
        COPY_EXISTING ~SW1H01.ITM~ ~override/INDIRAFINCH.XXX~
        COMPILE EVALUATE_BUFFER ~FinchNPC/d/xmodfinchindi.d~
          USING ~%er_tra_path%/english/sufinch.tra~
                ~%er_tra_path%/%LANGUAGE%/sufinch.tra~
-       EXTEND_TOP ~J#INDI.bcs~ ~FinchNPC/scripts/append_j#indi.baf~ EVALUATE_BUFFER
+EXTEND_TOP ~J#INDI.bcs~ ~FinchNPC/scripts/append_j#indi.baf~ EVALUATE_BUFFER
 END
 
 ACTION_IF FILE_EXISTS ~override/%er_tutu%ANDRIS.dlg~
@@ -301,11 +306,11 @@ COPY ~FinchNPC/items/sufbookB.itm~ ~override/sufbookB.itm~
   SAY NAME2 @1148
   SAY DESC @1149
 
-ACTION_IF GAME_IS ~bgee~ THEN BEGIN
-  COPY ~FinchNPC/items/misc3p.itm~ ~override/misc3p.itm~
+ACTION_IF NOT FILE_EXISTS_IN_GAME ~misc3p.itm~ THEN BEGIN
+  COPY ~FinchNPC/items/misc3p.itm~ ~override/sumisc3p.itm~
     LAUNCH_PATCH_MACRO ~ER_PATCH_GLASSES~
 END ELSE BEGIN
-  COPY_EXISTING ~misc3p.itm~ ~override/misc3p.itm~
+  COPY_EXISTING ~misc3p.itm~ ~override/sumisc3p.itm~
     LAUNCH_PATCH_MACRO ~ER_PATCH_GLASSES~
 END
 
@@ -326,24 +331,22 @@ EXTEND_BOTTOM ~%er_2600%.bcs~ ~FinchNPC/scripts/append_ar2600.baf~ EVALUATE_BUFF
 EXTEND_TOP ~%er_4002%.bcs~ ~FinchNPC/scripts/append_ar4002.baf~ EVALUATE_BUFFER
 EXTEND_TOP ~%er_4804%.bcs~ ~FinchNPC/scripts/append_ar4804.baf~ EVALUATE_BUFFER
 
-ACTION_IF GAME_IS ~bgt~ THEN BEGIN
-  EXTEND_TOP ~aram00.bcs~ ~FinchNPC/scripts/append_aram00.baf~
-END
 
-ACTION_IF GAME_IS ~bgee eet~ THEN BEGIN
-  EXTEND_TOP ~bd0103.bcs~ ~FinchNPC/scripts/append_aram00.baf~
+ACTION_IF (GAME_IS ~bgee~ AND GAME_INCLUDES ~sod~) OR (GAME_IS ~eet~) THEN BEGIN
+EXTEND_TOP ~bd0103.bcs~ ~FinchNPC/scripts/append_aram00.baf~
 END
 
 COMPILE EVALUATE_BUFFER ~FinchNPC/scripts/sufinch.baf~
 COMPILE EVALUATE_BUFFER ~FinchNPC/scripts/sufinchd.baf~
 
-
 ACTION_IF GAME_IS ~eet~ BEGIN
-	APPEND ~BGDIALOG.2da~ ~SUFINCH          SUFINCHP          SUFINCHJ          SUFINCHD~ UNLESS ~SUFINCH~
-	APPEND ~BGBANTER.2da~ ~SUFINCH       BSUFINCH~                                        UNLESS ~SUFINCH~
+	APPEND ~BGDIALOG.2da~ ~SUFINCH          SUFINCHP          SUFINCHJ          SUFINCHD  ~
+		UNLESS ~SUFINCH~
+	APPEND ~BGBANTER.2da~ ~SUFINCH       BSUFINCH~                          		UNLESS ~SUFINCH~
 END ELSE BEGIN
-	APPEND ~PDialog.2da~  ~SUFINCH          SUFINCHP          SUFINCHJ          SUFINCHD~ UNLESS ~SUFINCH~
-	APPEND ~Interdia.2da~ ~SUFINCH       BSUFINCH~                                        UNLESS ~SUFINCH~
+	APPEND ~PDialog.2da~  ~SUFINCH       SUFINCHP          SUFINCHJ          SUFINCHD  ~
+		UNLESS ~SUFINCH~
+	APPEND ~Interdia.2da~ ~SUFINCH       BSUFINCH~                          		UNLESS ~SUFINCH~
 END
 
 LAF HANDLE_AUDIO END
@@ -363,10 +366,9 @@ ACTION_IF GAME_IS ~eet~ BEGIN
 		INT_VAR
 			type = 1
 		STR_VAR
-			dv = "sufinch"
-			override_BG1 = "sufinch"
+			dv = "SUFINCH"
+			override_BG1 = "SUFINCH"
 			traFile = EVAL "EET/lang/%lng%/compatibility.tra"
 			string = "@5000002"
 	END
 END
-

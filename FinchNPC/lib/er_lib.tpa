@@ -8,14 +8,14 @@ OUTER_SPRINT er_imoen ~Imoen~
 OUTER_SPRINT er_uimoen ~IMOEN~
 OUTER_SPRINT er_tra_path ~%MOD_FOLDER%/tra~
 
-// (Re)define variables to handle differences between Tutu, BG:EE and BGT
+// (Re)define variables to handle differences between games
 ACTION_IF GAME_IS ~eet~ THEN BEGIN
     OUTER_SET er_fireb1 = 1
     OUTER_SET er_fireb2 = 0
     OUTER_SPRINT er_port ~bgee~
-    OUTER_SPRINT er_tra_path ~%MOD_FOLDER%/tra/bgee~
     OUTER_SPRINT er_imoen ~Imoen2~
     OUTER_SPRINT er_uimoen ~IMOEN2~
+    OUTER_SPRINT er_tra_path ~%MOD_FOLDER%/tra/bgee~
     OUTER_SPRINT er_bdynah ~BDYNAH~
     OUTER_SPRINT er_bimoen ~BIMOEN~
     OUTER_SPRINT er_bjahei ~BJAHEI~
@@ -73,7 +73,8 @@ ACTION_IF GAME_IS ~eet~ THEN BEGIN
     OUTER_SPRINT er_4002 ~BG4002~
     OUTER_SPRINT er_4804 ~BG4804~
     OUTER_SPRINT er_4900 ~BG4900~
-  END ELSE BEGIN
+    OUTER_SPRINT eet_var ~_~
+END
 ACTION_IF GAME_IS ~tutu tutu_totsc~ THEN BEGIN
   OUTER_SPRINT er_tutu ~_~
   OUTER_SPRINT er_tutf ~_~
@@ -134,8 +135,9 @@ ACTION_IF GAME_IS ~tutu tutu_totsc~ THEN BEGIN
   OUTER_SPRINT er_4002 ~_AR4002~
   OUTER_SPRINT er_4804 ~_AR4804~
   OUTER_SPRINT er_4900 ~_AR4900~
-END ELSE BEGIN
-  ACTION_IF GAME_IS ~bgee~ THEN BEGIN
+    OUTER_SPRINT eet_var ~~
+END 
+ACTION_IF GAME_IS ~bgee~ THEN BEGIN
     OUTER_SET er_fireb1 = 1
     OUTER_SET er_fireb2 = 0
     OUTER_SPRINT er_port ~bgee~
@@ -197,8 +199,9 @@ END ELSE BEGIN
     OUTER_SPRINT er_4002 ~AR4002~
     OUTER_SPRINT er_4804 ~AR4804~
     OUTER_SPRINT er_4900 ~AR4900~
-  END ELSE BEGIN
-    ACTION_IF GAME_IS ~bgt~ THEN BEGIN
+    OUTER_SPRINT eet_var ~~
+END 
+ACTION_IF GAME_IS ~bgt~ THEN BEGIN
       OUTER_SPRINT er_imoen ~Imoen2~
       OUTER_SPRINT er_uimoen ~IMOEN2~
       OUTER_SPRINT er_bdynah ~BDYNA~
@@ -258,15 +261,13 @@ END ELSE BEGIN
       OUTER_SPRINT er_4002 ~AR9902~
       OUTER_SPRINT er_4804 ~AR3704~
       OUTER_SPRINT er_4900 ~AR3800~
-    END
-  END
-END
+    OUTER_SPRINT eet_var ~~
 END
 
 // Macro to handle multiple tra encodings (slightly adapted from Wisp's original code)
 OUTER_SPRINT er_game ~sufinch~
 DEFINE_ACTION_MACRO bgee_language BEGIN
-  ACTION_IF GAME_IS ~bgee bg2ee eet~ BEGIN
+  ACTION_IF GAME_IS ~bgee eet~ BEGIN
     LOAD_TRA ~%MOD_FOLDER%/tra/bgee/english/%er_game%.tra~
     LOAD_TRA ~%MOD_FOLDER%/tra/bgee/%LANGUAGE%/%er_game%.tra~
   END
@@ -292,12 +293,53 @@ END
 // Patch Glasses of Identification for Finch
 DEFINE_PATCH_MACRO ~ER_PATCH_GLASSES~ 
 BEGIN
-  PATCH_IF GAME_IS ~bgee tutu tutu_totsc~ BEGIN
+  //PATCH_IF GAME_IS ~bgee tutu tutu_totsc eet bgt~ BEGIN
     SAY NAME1 @60
     SAY NAME2 @60
     SAY UNIDENTIFIED_DESC @61
     SAY DESC @61
-  END
+  //END
   READ_LONG 0x64 er_ability_offset
   WRITE_ASCII %er_ability_offset%+4 ~IMISC3P~ #8
+END
+
+DEFINE_PATCH_FUNCTION GET_SCRIPT_BLOCK
+INT_VAR
+  start_offset  = 0
+  reverse       = 0
+STR_VAR
+  search_regexp = ~~
+RET
+  script_block
+  start_offset
+  end_offset
+BEGIN
+  SET offset = start_offset
+  PATCH_IF (offset < 0) BEGIN SET offset = 0 END
+  PATCH_IF (offset > BUFFER_LENGTH) BEGIN SET offset = BUFFER_LENGTH END
+
+  TEXT_SPRINT script_block ~~
+  SET start_offset = "-1"
+  SET end_offset = "-1"
+
+  PATCH_IF (NOT ~%search_regexp%~ STR_EQ ~~) BEGIN
+    PATCH_IF (reverse) BEGIN
+      SET offset = RINDEX_BUFFER(~%search_regexp%~ offset)
+    END ELSE BEGIN
+      SET offset = INDEX_BUFFER(~%search_regexp%~ offset)
+    END
+
+    PATCH_IF (offset >= 0) BEGIN
+      SET ofsStart = RINDEX_BUFFER(~^IF$~ offset)
+      PATCH_IF (ofsStart >= 0) BEGIN
+        SET ofsEnd = INDEX_BUFFER(~^END$~ offset)
+        PATCH_IF (ofsEnd >= 0) BEGIN
+          SET ofsEnd += 3
+          READ_ASCII ofsStart script_block (ofsEnd - ofsStart)
+          SET start_offset = ofsStart
+          SET end_offset = ofsEnd
+        END
+      END
+    END
+  END
 END
