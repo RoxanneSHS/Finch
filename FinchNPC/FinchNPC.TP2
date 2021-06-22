@@ -362,13 +362,4 @@ ACTION_IF GAME_IS ~eet~ BEGIN
 		OUTER_SPRINT lng ~en_US~
 	END
 	INCLUDE ~EET/other/EET_functions.tph~
-	LAF ~EET_NPC_TRANSITION~
-		INT_VAR
-			type = 1
-		STR_VAR
-			dv = "SUFINCH"
-			override_BG1 = "SUFINCH"
-			traFile = EVAL "EET/lang/%lng%/compatibility.tra"
-			string = "@5000002"
 	END
-END
